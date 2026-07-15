@@ -1,14 +1,27 @@
 import streamlit as st
-from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.llms import HuggingFaceHub
-from langchain.chains import ConversationalRetrievalChain
+from huggingface_hub import InferenceClient
 
 st.set_page_config(page_title="Farm-GPT", page_icon="🌾")
-st.title("🌾 Farm-GPT: Ask Your Farming Questions")
-st.write("Upload farming PDFs and ask questions")
+st.title("🌾 Farm-GPT")
+st.write("Ask me anything about farming")
 
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-llm = HuggingFaceHub(repo_id="mistralai/Mistral-7B-Instruct-v0.1")
+client = InferenceClient("mistralai/Mistral-7B-Instruct-v0.1")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+for msg in st.session_state.messages:
+    st.chat_message(msg["role"]).write(msg["content"])
+
+if prompt := st.chat_input("Ask about crops, soil, pests..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.chat_message("user").write(prompt)
+    
+    with st.chat_message("assistant"):
+        response = client.chat_completion(
+            messages=st.session_state.messages,
+            max_tokens=500,
+        )
+        answer = response.choices[0].message.content
+        st.write(answer)
+    st.session_state.messages.append({"role": "assistant", "content": answer})
