@@ -1,8 +1,2 @@
 streamlit
-langchain
-langchain-community
-langchain-core
-faiss-cpu
-sentence-transformers
 huggingface_hub
-pypdf
