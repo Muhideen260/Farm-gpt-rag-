@@ -11,4 +11,4 @@ st.title("🌾 Farm-GPT: Ask Your Farming Questions")
 st.write("Upload farming PDFs and ask questions")
 
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-llm = HuggingFaceHub(repo_id="
+llm = HuggingFaceHub(repo_id="mistralai/Mistral-7B-Instruct-v0.1")
