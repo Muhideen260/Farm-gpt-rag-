@@ -5,7 +5,7 @@ st.set_page_config(page_title="Farm-GPT", page_icon="🌾")
 st.title("🌾 Farm-GPT")
 st.write("Ask me anything about farming")
 
-client = InferenceClient("mistralai/Mistral-7B-Instruct-v0.1")
+client = InferenceClient("mistralai/Mistral-7B-Instruct-v0.1", token=st.secrets["HF_TOKEN"])
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
