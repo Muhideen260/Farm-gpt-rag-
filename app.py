@@ -1,12 +1,16 @@
-
 import streamlit as st
-from huggingface_hub import InferenceClient
+from transformers import pipeline
 
 st.set_page_config(page_title="Farm-GPT", page_icon="🌾")
-st.title("Farm-GPT")
+st.title("Farm-GPT 🌾")
 st.write("Ask me anything about farming")
 
-client = InferenceClient("microsoft/DialoGPT-medium", token=st.secrets["HF_TOKEN"])
+# This downloads the model once, then works offline
+@st.cache_resource
+def load_model():
+    return pipeline("text-generation", model="google/flan-t5-base")
+
+generator = load_model()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -19,10 +23,7 @@ if prompt := st.chat_input("Ask about crops, soil, pests..."):
     st.chat_message("user").write(prompt)
 
     with st.chat_message("assistant"):
-        response = client.chat_completion(
-            messages=st.session_state.messages,
-            max_tokens=300,
-        )
-        answer = response.choices[0].message.content
-        st.write(answer)
-        st.session_state.messages.append({"role": "assistant", "content": answer})
+        with st.spinner("Thinking..."):
+            response = generator(f"Answer this farming question: {prompt}", max_length=200)[0]['generated_text']
+        st.write(response)
+        st.session_state.messages.append({"role": "assistant", "content": response})
