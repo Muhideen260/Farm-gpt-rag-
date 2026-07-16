@@ -24,6 +24,6 @@ if prompt := st.chat_input("Ask about crops, soil, pests..."):
 
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            response = generator(f"Answer this farming question: {prompt}", max_length=200)[0]['generated_text']
+            response = generator(f"You are a farming expert in Nigeria. Give helpful advice about: {prompt}", max_new_tokens=150, do_sample=True, temperature=0.7)[0]['generated_text']
         st.write(response)
         st.session_state.messages.append({"role": "assistant", "content": response})
