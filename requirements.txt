@@ -1,5 +1,2 @@
 streamlit
-transformers
-torch
-sentencepiece
-accelerate
+huggingface_hub>=0.24.0
