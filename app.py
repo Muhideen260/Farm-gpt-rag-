@@ -4,10 +4,11 @@ from transformers import pipeline
 st.set_page_config(page_title="Farm-GPT", page_icon="🌾")
 st.title("Farm-GPT 🌾")
 st.write("Ask me anything about farming")
-
-# This downloads the model once, then works offline
 @st.cache_resource
-return pipeline("text-generation", model="google/flan-t5-large")
+def load_model():
+    return pipeline("text-generation", model="google/flan-t5-large")
+
+
     return pipeline("text-generation", model="google/flan-t5-base")
 
 generator = load_model()
