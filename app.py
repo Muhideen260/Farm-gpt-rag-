@@ -9,7 +9,7 @@ def load_model():
     return pipeline("text-generation", model="google/flan-t5-large")
 
 
-    return pipeline("text-generation", model="google/flan-t5-base")
+    
 
 generator = load_model()
 
