@@ -1,28 +1,44 @@
 import streamlit as st
-from transformers import pipeline
+from huggingface_hub import InferenceClient
 
-st.set_page_config(page_title="Farm-GPT", page_icon="🌾")
+# -----------------------
+# Page Config
+# -----------------------
+st.set_page_config(
+    page_title="Farm-GPT 🌾",
+    page_icon="🌾",
+    layout="centered"
+)
 
-st.title("Farm-GPT 🌾")
-st.write("Ask me anything about farming.")
+st.title("🌾 Farm-GPT")
+st.caption("Your AI Farming Assistant for Nigeria 🇳🇬")
 
-@st.cache_resource
-def load_model():
-    return pipeline(
-        "text2text-generation",
-        model="google/flan-t5-base"
-    )
+# -----------------------
+# Hugging Face Token
+# -----------------------
+HF_TOKEN = st.secrets["HF_TOKEN"]
 
-generator = load_model()
+client = InferenceClient(
+    provider="hf-inference",
+    api_key=HF_TOKEN,
+)
 
+# -----------------------
+# Chat History
+# -----------------------
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.write(msg["content"])
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
 
-if prompt := st.chat_input("Ask about crops, pests, soil..."):
+# -----------------------
+# User Input
+# -----------------------
+prompt = st.chat_input("Ask anything about farming...")
+
+if prompt:
 
     st.session_state.messages.append(
         {"role": "user", "content": prompt}
@@ -33,14 +49,28 @@ if prompt := st.chat_input("Ask about crops, pests, soil..."):
 
     with st.chat_message("assistant"):
 
-        with st.spinner("Thinking..."):
+        with st.spinner("🌱 Thinking..."):
 
-            answer = generator(
-                f"You are an agricultural expert in Nigeria.\nQuestion: {prompt}",
-                max_new_tokens=150
-            )[0]["generated_text"]
+            response = client.chat.completions.create(
+                model="HuggingFaceH4/zephyr-7b-beta",
+                messages=[
+                    {
+                        "role": "system",
+                        "content":
+                        "You are Farm-GPT, an agricultural expert in Nigeria. "
+                        "Answer farming questions clearly with practical advice."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                max_tokens=300,
+            )
 
-        st.write(answer)
+            answer = response.choices[0].message.content
+
+            st.write(answer)
 
     st.session_state.messages.append(
         {"role": "assistant", "content": answer}
