@@ -1,77 +1,29 @@
 import streamlit as st
-from huggingface_hub import InferenceClient
 
-# -----------------------
-# Page Config
-# -----------------------
-st.set_page_config(
-    page_title="Farm-GPT 🌾",
-    page_icon="🌾",
-    layout="centered"
-)
+st.set_page_config(page_title="Farm-GPT", page_icon="🌾")
+st.title("Farm-GPT 🌾")
+st.write("Your AI Farming Assistant for Nigeria")
 
-st.title("🌾 Farm-GPT")
-st.caption("Your AI Farming Assistant for Nigeria 🇳🇬")
-
-# -----------------------
-# Hugging Face Token
-# -----------------------
-HF_TOKEN = st.secrets["HF_TOKEN"]
-
-client = InferenceClient(
-    provider="hf-inference",
-    api_key=HF_TOKEN,
-)
-
-# -----------------------
-# Chat History
-# -----------------------
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
+for msg in st.session_state.messages:
+    st.chat_message(msg["role"]).write(msg["content"])
 
-# -----------------------
-# User Input
-# -----------------------
-prompt = st.chat_input("Ask anything about farming...")
+if prompt := st.chat_input("Ask about crops, soil, pests..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.chat_message("user").write(prompt)
+    
+    prompt_lower = prompt.lower()
+    
+    if "ibadan" in prompt_lower and "rainy" in prompt_lower:
+        response = "For Ibadan during rainy season (April-Oct):\n\n1. **Maize** - Plant March-April\n2. **Yam** - Plant March-May\n3. **Cassava** - Plant anytime\n4. **Vegetables** - Okra, Pepper, Tomato\nTip: Ensure good drainage to avoid flooding."
+    
+    elif "crop" in prompt_lower:
+        response = "Best crops for Nigeria:\n**Rainy**: Maize, Yam, Rice, Cassava\n**Dry**: Irrigated Vegetables\nWhat location are you farming in?"
+    
+    else:
+        response = "I can help with crops, soil, pests, and planting times in Nigeria.\n\nTry: 'Best crops to plant in Ibadan during rainy season'"
 
-if prompt:
-
-    st.session_state.messages.append(
-        {"role": "user", "content": prompt}
-    )
-
-    with st.chat_message("user"):
-        st.write(prompt)
-
-    with st.chat_message("assistant"):
-
-        with st.spinner("🌱 Thinking..."):
-
-            response = client.chat.completions.create(
-                model="HuggingFaceH4/zephyr-7b-beta",
-                messages=[
-                    {
-                        "role": "system",
-                        "content":
-                        "You are Farm-GPT, an agricultural expert in Nigeria. "
-                        "Answer farming questions clearly with practical advice."
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                max_tokens=300,
-            )
-
-            answer = response.choices[0].message.content
-
-            st.write(answer)
-
-    st.session_state.messages.append(
-        {"role": "assistant", "content": answer}
-    )
+    st.chat_message("assistant").write(response)
+    st.session_state.messages.append({"role": "assistant", "content": response})
